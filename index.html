@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (user && user.email === ADMIN_EMAIL) {
             loginContainer.style.display = 'none';
             adminPanel.style.display = 'block';
-            adminEmailEl.textContent = `Logged in as: ${user.email}`;
+            adminEmailEl.textContent = 'Logged in as: Owner';
             loadProjects();
         } else {
             loginContainer.style.display = 'block';
