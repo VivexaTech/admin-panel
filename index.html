@@ -125,12 +125,14 @@
 document.addEventListener('DOMContentLoaded', () => {
     const ADMIN_EMAIL = "vivexatech@gmail.com"; 
 
-    // Firebase ko initialize karein (firebaseConfig ab 'firebase-config.js' se aa raha hai)
+    // Firebase initialization (sirf Firestore ke liye)
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
-    const storage = firebase.storage();
     const googleProvider = new firebase.auth.GoogleAuthProvider();
+
+    const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/drkvub4nq/image/upload";
+    const CLOUDINARY_UPLOAD_PRESET = "vivexa_img";
 
     const loginContainer = document.getElementById('login-container');
     const adminPanel = document.getElementById('admin-panel');
@@ -161,6 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loginBtn.addEventListener('click', () => { auth.signInWithPopup(googleProvider).catch(err => console.error(err)); });
     logoutBtn.addEventListener('click', () => { auth.signOut(); });
 
+    // Add Project
     const addProjectForm = document.getElementById('add-project-form');
     addProjectForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -177,9 +180,17 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.disabled = true; submitBtn.textContent = 'Uploading...';
 
         try {
-            const imageRef = storage.ref(`portfolio_images/${Date.now()}_${imageFile.name}`);
-            const snapshot = await imageRef.put(imageFile);
-            const imageUrl = await snapshot.ref.getDownloadURL();
+            // Cloudinary upload
+            const formData = new FormData();
+            formData.append("file", imageFile);
+            formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+            const cloudRes = await fetch(CLOUDINARY_URL, {
+                method: "POST",
+                body: formData
+            });
+            const cloudData = await cloudRes.json();
+            const imageUrl = cloudData.secure_url;
 
             await db.collection('portfolio').add({
                 title, description, tags, imageUrl,
@@ -196,6 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Load Projects
     const projectsContainer = document.getElementById('project-items-container');
     function loadProjects() {
         db.collection('portfolio').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
@@ -212,24 +224,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span>${project.title}</span>
                     <div class="actions">
                         <button class="edit-btn" data-id="${doc.id}">Edit</button>
-                        <button class="delete-btn" data-id="${doc.id}" data-image-url="${project.imageUrl}">Delete</button>
+                        <button class="delete-btn" data-id="${doc.id}">Delete</button>
                     </div>
                 `;
                 projectsContainer.appendChild(projectEl);
             });
         });
     }
-    
+
+    // Edit/Delete Actions
     projectsContainer.addEventListener('click', async (e) => {
         const docId = e.target.dataset.id;
         
         if (e.target.classList.contains('delete-btn')) {
-            const imageUrl = e.target.dataset.imageUrl;
             if (confirm("Are you sure you want to delete this project?")) {
                 try {
                     await db.collection('portfolio').doc(docId).delete();
-                    const imageRef = storage.refFromURL(imageUrl);
-                    await imageRef.delete();
                     alert("Project deleted successfully.");
                 } catch (error) { console.error("Error deleting project:", error); }
             }
@@ -252,10 +262,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Save Edited Project
     editForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const docId = editForm.dataset.docId;
-        const oldImageUrl = editForm.dataset.oldImageUrl;
         const newImageFile = document.getElementById('edit-image').files[0];
         
         const submitBtn = editForm.querySelector('button');
@@ -263,14 +273,18 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.textContent = 'Saving...';
 
         try {
-            let updatedImageUrl = oldImageUrl;
+            let updatedImageUrl = editForm.dataset.oldImageUrl;
             if (newImageFile) {
-                const newImageRef = storage.ref(`portfolio_images/${Date.now()}_${newImageFile.name}`);
-                const snapshot = await newImageRef.put(newImageFile);
-                updatedImageUrl = await snapshot.ref.getDownloadURL();
-                
-                const oldImageRef = storage.refFromURL(oldImageUrl);
-                await oldImageRef.delete();
+                const formData = new FormData();
+                formData.append("file", newImageFile);
+                formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+                const cloudRes = await fetch(CLOUDINARY_URL, {
+                    method: "POST",
+                    body: formData
+                });
+                const cloudData = await cloudRes.json();
+                updatedImageUrl = cloudData.secure_url;
             }
 
             const updatedData = {
@@ -307,6 +321,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>
-
 </body>
 </html>
