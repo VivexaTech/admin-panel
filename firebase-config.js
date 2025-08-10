@@ -1,6 +1,4 @@
-// firebase-config.js
 var firebaseConfig = {
-
   apiKey: "AIzaSyArx3eeAj98XkXJqMtITF2I00sjm-LQDqs",
   authDomain: "vivexa-admin.firebaseapp.com",
   projectId: "vivexa-admin",
