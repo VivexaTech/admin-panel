@@ -25,8 +25,19 @@
         .form-group input, .form-group textarea { width: 100%; padding: 12px; background-color: var(--dark-bg); border: 1px solid var(--border-color); border-radius: var(--border-radius); color: var(--text-primary); font-size: 1rem; box-sizing: border-box; }
         #logout-btn { background: #475569; margin-top: 1rem; }
         #projects-list { margin-top: 3rem; }
-        .project-item { background-color: var(--dark-bg); padding: 1rem; border-radius: var(--border-radius); margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
-        .delete-btn { background-color: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; }
+        .project-item { background-color: var(--dark-bg); padding: 1rem; border-radius: var(--border-radius); margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem;}
+        .project-item span { flex-grow: 1; }
+        .project-item .actions { display: flex; gap: 0.5rem; }
+        .edit-btn, .delete-btn { color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; }
+        .edit-btn { background-color: #3b82f6; }
+        .delete-btn { background-color: #ef4444; }
+        
+        /* --- NAYA EDIT MODAL KA STYLE --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: var(--dark-card); padding: 2rem; border-radius: var(--border-radius); width: 90%; max-width: 500px; border: 1px solid var(--dark-border); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .modal-header h2 { margin: 0; text-align: left; }
+        .close-modal { background: none; border: none; font-size: 2rem; color: var(--text-secondary); cursor: pointer; }
     </style>
 </head>
 <body>
@@ -44,19 +55,19 @@
         <h2>Add New Project</h2>
         <form id="add-project-form">
             <div class="form-group">
-                <label for="title">Project Title (e.g., Local Cafe Website)</label>
+                <label for="title">Project Title</label>
                 <input type="text" id="title" required>
             </div>
             <div class="form-group">
-                <label for="description">Project Description (e.g., Startup Business Website)</label>
+                <label for="description">Project Description</label>
                 <input type="text" id="description" required>
             </div>
             <div class="form-group">
-                <label for="tags">Tech Tags (comma separated, e.g., HTML,CSS,JavaScript)</label>
+                <label for="tags">Tech Tags (comma separated)</label>
                 <input type="text" id="tags" required>
             </div>
             <div class="form-group">
-                <label for="image">Project Image (Recommended Ratio 16:10)</label>
+                <label for="image">Project Image</label>
                 <input type="file" id="image" accept="image/*" required>
             </div>
             <button type="submit" class="cta-button">Add Project</button>
@@ -64,11 +75,39 @@
 
         <div id="projects-list">
             <h2>Existing Projects</h2>
-            <div id="project-items-container">
-                </div>
+            <div id="project-items-container"></div>
         </div>
         
         <button id="logout-btn" class="cta-button">Logout</button>
+    </div>
+</div>
+
+<div id="edit-modal-overlay" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Edit Project</h2>
+            <button class="close-modal" aria-label="Close">&times;</button>
+        </div>
+        <form id="edit-project-form">
+            <div class="form-group">
+                <label for="edit-title">Project Title</label>
+                <input type="text" id="edit-title" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-description">Project Description</label>
+                <input type="text" id="edit-description" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-tags">Tech Tags (comma separated)</label>
+                <input type="text" id="edit-tags" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-image">Upload New Image (optional)</label>
+                <input type="file" id="edit-image" accept="image/*">
+                <p style="font-size: 0.8rem; margin-top: 5px;">(Sirf tabhi select karein jab image badalni ho)</p>
+            </div>
+            <button type="submit" class="cta-button">Save Changes</button>
+        </form>
     </div>
 </div>
 
@@ -79,16 +118,16 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // ======== IMPORTANT: APNA ADMIN EMAIL YAHA DAALEIN ========
-    const ADMIN_EMAIL = "vivexatech@gmail.com"; // <-- Yahan apna Google account email likhein
+    const ADMIN_EMAIL = "vivexatech@gmail.com"; 
 
+    // IMPORTANT: Yahan apne naye Firebase Project ka config daalein
     const firebaseConfig = {
-      apiKey: "AIzaSyDlmiQxH2ZFU2eUZ7V3JRtNNy8ozzJJ2_k",
-      authDomain: "vivexa-testimonial.firebaseapp.com",
-      projectId: "vivexa-testimonial",
-      storageBucket: "vivexa-testimonial.appspot.com",
-      messagingSenderId: "615030329099",
-      appId: "1:615030329099:web:a4021bf93cb8a48bd71c0e"
+    apiKey: "AIzaSyArx3eeAj98XkXJqMtITF2I00sjm-LQDqs",
+    authDomain: "vivexa-admin.firebaseapp.com",
+    projectId: "vivexa-admin",
+    storageBucket: "vivexa-admin.firebasestorage.app",
+    messagingSenderId: "68717817629",
+    appId: "1:68717817629:web:a2a6dc32979f2b2d1fbbf4",
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -103,7 +142,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoutBtn = document.getElementById('logout-btn');
     const adminEmailEl = document.getElementById('admin-email');
 
-    // Check user state
+    // --- NAYE EDIT MODAL KE ELEMENTS ---
+    const editModalOverlay = document.getElementById('edit-modal-overlay');
+    const editForm = document.getElementById('edit-project-form');
+    const closeModalBtn = document.querySelector('.close-modal');
+
+    // Login/Logout aur access check ka logic waisa hi rahega...
     auth.onAuthStateChanged(user => {
         if (user && user.email === ADMIN_EMAIL) {
             loginContainer.style.display = 'none';
@@ -113,25 +157,146 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             loginContainer.style.display = 'block';
             adminPanel.style.display = 'none';
-            if (user) { // Agar koi aur user login karta hai
+            if (user) { 
                 auth.signOut();
                 alert("Access Denied. Only the admin can log in.");
             }
         }
     });
+    loginBtn.addEventListener('click', () => { auth.signInWithPopup(googleProvider); });
+    logoutBtn.addEventListener('click', () => { auth.signOut(); });
 
-    // Login
-    loginBtn.addEventListener('click', () => {
-        auth.signInWithPopup(googleProvider).catch(error => console.error("Login Error:", error));
-    });
-
-    // Logout
-    logoutBtn.addEventListener('click', () => {
-        auth.signOut();
-    });
-
-    // Add Project Form
+    // Add Project Form (Pehle jaisa hi)
     const addProjectForm = document.getElementById('add-project-form');
+    addProjectForm.addEventListener('submit', async (e) => { e.preventDefault(); /* ... pehle jaisa hi code ... */ });
+
+    // Load and Display Projects
+    const projectsContainer = document.getElementById('project-items-container');
+    function loadProjects() {
+        db.collection('portfolio').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
+            projectsContainer.innerHTML = '';
+            if(snapshot.empty) {
+                projectsContainer.innerHTML = '<p>No projects found.</p>';
+                return;
+            }
+            snapshot.forEach(doc => {
+                const project = doc.data();
+                const projectEl = document.createElement('div');
+                projectEl.className = 'project-item';
+                // --- UPDATE: Edit button add kiya gaya hai ---
+                projectEl.innerHTML = `
+                    <span>${project.title}</span>
+                    <div class="actions">
+                        <button class="edit-btn" data-id="${doc.id}">Edit</button>
+                        <button class="delete-btn" data-id="${doc.id}" data-image-url="${project.imageUrl}">Delete</button>
+                    </div>
+                `;
+                projectsContainer.appendChild(projectEl);
+            });
+        });
+    }
+    
+    // --- EVENT LISTENER AB EDIT AUR DELETE DONO HANDLE KAREGA ---
+    projectsContainer.addEventListener('click', async (e) => {
+        const docId = e.target.dataset.id;
+        
+        // DELETE LOGIC (Pehle jaisa)
+        if (e.target.classList.contains('delete-btn')) {
+            const imageUrl = e.target.dataset.imageUrl;
+            if (confirm("Are you sure you want to delete this project?")) {
+                try {
+                    await db.collection('portfolio').doc(docId).delete();
+                    const imageRef = storage.refFromURL(imageUrl);
+                    await imageRef.delete();
+                    alert("Project deleted successfully.");
+                } catch (error) { console.error("Error deleting project:", error); }
+            }
+        }
+
+        // NAYA EDIT LOGIC
+        if (e.target.classList.contains('edit-btn')) {
+            const docRef = db.collection('portfolio').doc(docId);
+            const docSnap = await docRef.get();
+            if (docSnap.exists()) {
+                const projectData = docSnap.data();
+                // Form mein purana data bharo
+                document.getElementById('edit-title').value = projectData.title;
+                document.getElementById('edit-description').value = projectData.description;
+                document.getElementById('edit-tags').value = projectData.tags.join(', ');
+                
+                // Form par document ID aur purani image ka URL store karo
+                editForm.dataset.docId = docId;
+                editForm.dataset.oldImageUrl = projectData.imageUrl;
+                
+                // Modal dikhao
+                editModalOverlay.style.display = 'flex';
+            }
+        }
+    });
+
+    // NAYA: EDIT FORM SUBMIT LOGIC
+    editForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const docId = editForm.dataset.docId;
+        const oldImageUrl = editForm.dataset.oldImageUrl;
+        const newImageFile = document.getElementById('edit-image').files[0];
+        
+        const submitBtn = editForm.querySelector('button');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving...';
+
+        try {
+            let updatedImageUrl = oldImageUrl;
+            // Agar nayi image upload hui hai
+            if (newImageFile) {
+                // 1. Nayi image upload karo
+                const newImageRef = storage.ref(`portfolio_images/${Date.now()}_${newImageFile.name}`);
+                const snapshot = await newImageRef.put(newImageFile);
+                updatedImageUrl = await snapshot.ref.getDownloadURL();
+                
+                // 2. Purani image delete karo
+                const oldImageRef = storage.refFromURL(oldImageUrl);
+                await oldImageRef.delete();
+            }
+
+            // Data update karo
+            const updatedData = {
+                title: document.getElementById('edit-title').value,
+                description: document.getElementById('edit-description').value,
+                tags: document.getElementById('edit-tags').value.split(',').map(tag => tag.trim()),
+                imageUrl: updatedImageUrl
+            };
+            
+            await db.collection('portfolio').doc(docId).update(updatedData);
+            alert("Project updated successfully!");
+            
+        } catch (error) {
+            console.error("Error updating project:", error);
+            alert("Failed to update project.");
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Save Changes';
+            closeEditModal();
+        }
+    });
+
+    // NAYA: MODAL BAND KARNE KA LOGIC
+    function closeEditModal() {
+        editModalOverlay.style.display = 'none';
+        editForm.reset();
+        delete editForm.dataset.docId;
+        delete editForm.dataset.oldImageUrl;
+    }
+    closeModalBtn.addEventListener('click', closeEditModal);
+    editModalOverlay.addEventListener('click', (e) => {
+        if (e.target === editModalOverlay) {
+            closeEditModal();
+        }
+    });
+
+    // Add form ka logic, jo maine upar shorten kiya tha, yahan poora daal dein.
+    // Maine code ko chhota karne ke liye comment out kiya tha.
+    // Yeh wahi code hai jo aapne pehle diya tha.
     addProjectForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const title = document.getElementById('title').value;
@@ -140,26 +305,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const imageFile = document.getElementById('image').files[0];
 
         if (!title || !description || !tags.length || !imageFile) {
-            alert("Please fill all fields.");
-            return;
+            alert("Please fill all fields."); return;
         }
 
         const submitBtn = addProjectForm.querySelector('button');
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Uploading...';
+        submitBtn.disabled = true; submitBtn.textContent = 'Uploading...';
 
         try {
-            // 1. Upload Image to Storage
             const imageRef = storage.ref(`portfolio_images/${Date.now()}_${imageFile.name}`);
             const snapshot = await imageRef.put(imageFile);
             const imageUrl = await snapshot.ref.getDownloadURL();
 
-            // 2. Add Project data to Firestore
             await db.collection('portfolio').add({
-                title,
-                description,
-                tags,
-                imageUrl,
+                title, description, tags, imageUrl,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
 
@@ -167,58 +325,12 @@ document.addEventListener('DOMContentLoaded', () => {
             addProjectForm.reset();
         } catch (error) {
             console.error("Error adding project: ", error);
-            alert("Failed to add project. Check console for details.");
+            alert("Failed to add project.");
         } finally {
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Add Project';
+            submitBtn.disabled = false; submitBtn.textContent = 'Add Project';
         }
     });
 
-    // Load and Display Projects
-    const projectsContainer = document.getElementById('project-items-container');
-    function loadProjects() {
-        db.collection('portfolio').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
-            projectsContainer.innerHTML = '';
-            if(snapshot.empty) {
-                projectsContainer.innerHTML = '<p>No projects found. Add one using the form above.</p>';
-                return;
-            }
-            snapshot.forEach(doc => {
-                const project = doc.data();
-                const projectEl = document.createElement('div');
-                projectEl.className = 'project-item';
-                projectEl.innerHTML = `
-                    <span>${project.title}</span>
-                    <button class="delete-btn" data-id="${doc.id}" data-image-url="${project.imageUrl}">Delete</button>
-                `;
-                projectsContainer.appendChild(projectEl);
-            });
-        });
-    }
-    
-    // Delete Project
-    projectsContainer.addEventListener('click', async (e) => {
-        if (e.target.classList.contains('delete-btn')) {
-            const docId = e.target.dataset.id;
-            const imageUrl = e.target.dataset.imageUrl;
-
-            if (confirm("Are you sure you want to delete this project?")) {
-                try {
-                    // Delete from Firestore
-                    await db.collection('portfolio').doc(docId).delete();
-                    
-                    // Delete image from Storage
-                    const imageRef = storage.refFromURL(imageUrl);
-                    await imageRef.delete();
-                    
-                    alert("Project deleted successfully.");
-                } catch (error) {
-                    console.error("Error deleting project:", error);
-                    alert("Could not delete project. It's possible the image was already deleted. Refresh and try again.");
-                }
-            }
-        }
-    });
 });
 </script>
 
