@@ -69,16 +69,14 @@
         .receipt-panel-content { display: flex; gap: 2rem; align-items: flex-start; }
         .receipt-form-wrapper { flex: 1; min-width: 350px; }
         #items-container .item-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
-        /* NEW STYLES FOR ITEM INPUTS */
         #items-container .item-row .item-name { flex-grow: 1; }
         #items-container .item-row .item-qty,
         #items-container .item-row .item-price { width: 70px; flex-shrink: 0; }
-
         .add-item-btn { background: var(--green); }
         .download-pdf-btn { background: var(--red); }
         
         /* --- INVOICE PREVIEW STYLES --- */
-        #invoice-container { flex: 2; background: #fff; color: #000; padding: 40px; box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); border: 1px solid #eee; }
+        #invoice-container { flex: 2; width: 100%; background: #fff; color: #000; padding: 40px; box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); border: 1px solid #eee; }
         .invoice-header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 20px; border-bottom: 2px solid #000; }
         .invoice-header h1 { font-size: 48px; font-weight: 700; margin: 0; color: #000; }
         .logo img { max-width: 150px; }
@@ -101,6 +99,7 @@
         /* --- RESPONSIVE STYLES --- */
         @media (max-width: 992px) {
             .receipt-panel-content { flex-direction: column; }
+            #invoice-container { flex: none; } /* Remove flex property when stacked */
         }
         @media (max-width: 768px) {
             body { padding: 1rem; }
@@ -271,6 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
             loginContainer.style.display = 'none';
             adminArea.style.display = 'block';
             showPanel('home-panel');
+            adminEmailEl.textContent = 'Logged in as: Owner';
             loadProjects();
         } else {
             loginContainer.style.display = 'block';
@@ -468,21 +468,31 @@ document.addEventListener('DOMContentLoaded', () => {
         const invoiceElement = document.getElementById('invoice-container');
         const invoiceNo = document.getElementById('invoice-no').value || 'invoice';
         const downloadBtn = document.querySelector('.download-pdf-btn');
+        
+        // --- NEW --- Store original style and apply fixed width
+        const originalWidth = invoiceElement.style.width;
+        invoiceElement.style.width = '800px';
+
         downloadBtn.textContent = 'Downloading...';
         downloadBtn.disabled = true;
 
-        html2canvas(invoiceElement, { scale: 2, useCORS: true }).then(canvas => {
+        html2canvas(invoiceElement, { 
+            scale: 2, 
+            useCORS: true 
+        }).then(canvas => {
             const imgData = canvas.toDataURL('image/png');
             const canvasWidth = canvas.width;
             const canvasHeight = canvas.height;
             const pdf = new jsPDF({ orientation: canvasWidth > canvasHeight ? 'l' : 'p', unit: 'px', format: [canvasWidth, canvasHeight] });
             pdf.addImage(imgData, 'PNG', 0, 0, canvasWidth, canvasHeight);
             pdf.save(`invoice-${invoiceNo}.pdf`);
-            downloadBtn.textContent = 'Download PDF';
-            downloadBtn.disabled = false;
         }).catch(err => {
             console.error("PDF generation failed:", err);
             alert("Could not download PDF. Check console for errors.");
+        }).finally(() => {
+            // --- NEW --- Revert to original style, no matter what
+            invoiceElement.style.width = originalWidth;
+            
             downloadBtn.textContent = 'Download PDF';
             downloadBtn.disabled = false;
         });
