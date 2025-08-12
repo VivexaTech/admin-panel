@@ -1,171 +1,264 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vivexa Tech | Admin Panel</title>
-<link rel="icon" type="image/png" href="favicon/favicon-96x96.png" sizes="96x96" />
-<link rel="icon" type="image/svg+xml" href="favicon/favicon.svg" />
-<link rel="shortcut icon" href="favicon/favicon.ico" />
-<link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png" />
-<meta name="apple-mobile-web-app-title" content="Vivexa Admin" />
-<link rel="manifest" href="favicon/site.webmanifest" />
+
+    <link rel="icon" type="image/png" href="favicon/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="favicon/favicon.svg" />
+    <link rel="shortcut icon" href="favicon/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Vivexa Admin" />
+    <link rel="manifest" href="favicon/site.webmanifest" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>  
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     <style>
-        :root { 
+        :root {
             --dark-bg: #0A101E; --dark-card: #10182C; --dark-border: #1E293B;
             --text-primary: #E2E8F0; --text-secondary: #94A3B8; --cyan: #00E6F7; --blue: #3672F8;
+            --green: #22c55e; --red: #ef4444; --gray: #475569;
             --border-radius: 8px; --transition: all 0.3s ease;
         }
-        body { background-color: var(--dark-bg); color: var(--text-secondary); font-family: 'Poppins', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 2rem; }
-        .container { width: 100%; max-width: 800px; }
-        .login-container, .admin-panel { background-color: var(--dark-card); padding: 2rem; border-radius: var(--border-radius); border: 1px solid var(--border-color); }
-        h1, h2 { color: var(--text-primary); text-align: center; margin-bottom: 2rem; }
-        .cta-button { display: inline-block; width: 100%; padding: 14px 32px; border: none; border-radius: var(--border-radius); background: linear-gradient(90deg, var(--cyan), var(--blue)); color: #fff; font-weight: 700; font-size: 1rem; cursor: pointer; transition: var(--transition); }
+        
+        /* --- GENERAL STYLES --- */
+        body { background-color: var(--dark-bg); color: var(--text-secondary); font-family: 'Poppins', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 2rem; box-sizing: border-box;}
+        .container { width: 100%; max-width: 1200px; }
+        h1, h2, h3 { color: var(--text-primary); text-align: center; margin-bottom: 2rem; }
+        .cta-button { display: inline-block; width: 100%; padding: 14px 32px; border: none; border-radius: var(--border-radius); background: linear-gradient(90deg, var(--cyan), var(--blue)); color: #fff; font-weight: 700; font-size: 1rem; cursor: pointer; transition: var(--transition); text-align: center; }
         .cta-button:hover { filter: brightness(1.2); }
-        .admin-panel { display: none; }
+        .cta-button:disabled { background: var(--gray); cursor: not-allowed; filter: brightness(0.7); }
+        .back-btn { background: var(--gray); margin-bottom: 2rem; }
         .form-group { margin-bottom: 1.5rem; }
         .form-group label { display: block; margin-bottom: 5px; font-size: 0.9rem; }
-        .form-group input, .form-group textarea { width: 100%; padding: 12px; background-color: var(--dark-bg); border: 1px solid var(--border-color); border-radius: var(--border-radius); color: var(--text-primary); font-size: 1rem; box-sizing: border-box; }
-        #logout-btn { background: #475569; margin-top: 1rem; }
+        .form-group input, .form-group textarea { width: 100%; padding: 12px; background-color: var(--dark-bg); border: 1px solid var(--dark-border); border-radius: var(--border-radius); color: var(--text-primary); font-size: 1rem; box-sizing: border-box; }
+        
+        /* --- MAIN SECTIONS VISIBILITY --- */
+        .login-container, .home-panel, .portfolio-panel, .receipt-panel { display: none; }
+        .panel-card { background-color: var(--dark-card); padding: 2rem; border-radius: var(--border-radius); border: 1px solid var(--dark-border); }
+
+        /* --- HOME PANEL --- */
+        .home-panel-options { display: flex; flex-direction: column; gap: 1.5rem; max-width: 400px; margin: 2rem auto 0; }
+        .home-panel-options .cta-button { font-size: 1.2rem; }
+        #logout-btn { background: var(--red); margin-top: 2rem; }
+
+        /* --- PORTFOLIO PANEL --- */
         #projects-list { margin-top: 3rem; }
         .project-item { background-color: var(--dark-bg); padding: 1rem; border-radius: var(--border-radius); margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem;}
-        .project-item span { flex-grow: 1; }
+        .project-item span { flex-grow: 1; color: var(--text-primary); }
         .project-item .actions { display: flex; gap: 0.5rem; }
-        .edit-btn, .delete-btn { color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; }
-        .edit-btn { background-color: #3b82f6; }
-        .delete-btn { background-color: #ef4444; }
-        
-        /* --- EDIT MODAL STYLE --- */
+        .edit-btn, .delete-btn { color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; transition: var(--transition); }
+        .edit-btn { background-color: var(--blue); }
+        .delete-btn { background-color: var(--red); }
+
+        /* --- EDIT MODAL --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: var(--dark-card); padding: 2rem; border-radius: var(--border-radius); width: 90%; max-width: 500px; border: 1px solid var(--dark-border); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
         .modal-header h2 { margin: 0; text-align: left; }
         .close-modal { background: none; border: none; font-size: 2rem; color: var(--text-secondary); cursor: pointer; }
+
+        /* --- RECEIPT GENERATOR PANEL --- */
+        .receipt-panel-content { display: flex; gap: 2rem; align-items: flex-start; }
+        .receipt-form-wrapper { flex: 1; min-width: 350px; }
+        #items-container .item-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        #items-container .item-row input { flex: 1; }
+        .add-item-btn { background: var(--green); }
+        .download-pdf-btn { background: var(--red); }
+        
+        /* --- INVOICE PREVIEW STYLES --- */
+        #invoice-container { flex: 2; background: #fff; color: #000; padding: 40px; box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); border: 1px solid #eee; }
+        .invoice-header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 20px; border-bottom: 2px solid #000; }
+        .invoice-header h1 { font-size: 48px; font-weight: 700; margin: 0; color: #000; }
+        .logo img { max-width: 150px; }
+        .company-name { font-size: 36px; font-weight: bold; color: #000; text-align: right;}
+        .company-name span { color: #00AEEF; }
+        .invoice-details { display: flex; justify-content: space-between; margin-top: 20px; color: #333; }
+        .billed-to p { margin: 5px 0; }
+        .invoice-table { width: 100%; border-collapse: collapse; margin-top: 40px; }
+        .invoice-table thead { border-bottom: 2px dotted #000; }
+        .invoice-table th { text-align: left; padding: 10px; color: #555; font-weight: 500; }
+        .invoice-table td { padding: 15px 10px; color: #333; }
+        .invoice-table th:not(:first-child), .invoice-table td:not(:first-child) { text-align: right; }
+        .invoice-table tbody tr { border-bottom: 1px dotted #ccc; }
+        .invoice-table tbody tr:last-child { border-bottom: 2px dotted #000; }
+        .total-section { text-align: right; margin-top: 20px; font-size: 24px; font-weight: bold; color: #000;}
+        .payment-details { margin-top: 50px; color: #333; }
+        .payment-details p { margin: 5px 0; font-size: 16px; }
+        .thank-you { font-family: 'Dancing Script', cursive; font-size: 48px; margin-top: 50px; color: #000; }
+        
     </style>
 </head>
+
 <body>
 
 <div class="container">
-    <div id="login-container" class="login-container">
+    <div id="login-container" class="panel-card">
         <h1>Admin Login</h1>
         <button id="login-btn" class="cta-button">Login with Google</button>
     </div>
 
-    <div id="admin-panel" class="admin-panel">
-        <h1>Portfolio Management</h1>
-        <p id="admin-email" style="text-align: center; margin-top:-1.5rem; margin-bottom: 2rem;"></p>
-        
-        <h2>Add New Project</h2>
-        <form id="add-project-form">
-            <div class="form-group">
-                <label for="title">Project Title</label>
-                <input type="text" id="title" required>
-            </div>
-            <div class="form-group">
-                <label for="description">Project Description</label>
-                <input type="text" id="description" required>
-            </div>
-            <div class="form-group">
-                <label for="tags">Tech Tags (comma separated)</label>
-                <input type="text" id="tags" required>
-            </div>
-            <div class="form-group">
-                <label for="image">Project Image</label>
-                <input type="file" id="image" accept="image/*" required>
-            </div>
-            <button type="submit" class="cta-button">Add Project</button>
-        </form>
+    <div id="admin-area">
+        <p id="admin-email" style="text-align: center; margin-bottom: 1rem;"></p>
 
-        <div id="projects-list">
-            <h2>Existing Projects</h2>
-            <div id="project-items-container"></div>
+        <div id="home-panel" class="panel-card">
+            <h1>Admin Dashboard</h1>
+            <div class="home-panel-options">
+                <button id="go-to-portfolio-btn" class="cta-button">Manage Portfolio</button>
+                <button id="go-to-receipt-btn" class="cta-button">Generate Receipt</button>
+                <button id="logout-btn" class="cta-button">Logout</button>
+            </div>
         </div>
-        
-        <button id="logout-btn" class="cta-button">Logout</button>
+
+        <div id="portfolio-panel" class="panel-card">
+            <button class="cta-button back-btn" onclick="showPanel('home-panel')">← Back to Home</button>
+            <h1>Portfolio Management</h1>
+            <h2>Add New Project</h2>
+            <form id="add-project-form">
+                <div class="form-group"><label for="title">Project Title</label><input type="text" id="title" required></div>
+                <div class="form-group"><label for="description">Project Description</label><input type="text" id="description" required></div>
+                <div class="form-group"><label for="tags">Tech Tags (comma separated)</label><input type="text" id="tags" required></div>
+                <div class="form-group"><label for="image">Project Image</label><input type="file" id="image" accept="image/*" required></div>
+                <button type="submit" class="cta-button">Add Project</button>
+            </form>
+
+            <div id="projects-list">
+                <h2>Existing Projects</h2>
+                <div id="project-items-container"></div>
+            </div>
+        </div>
+
+        <div id="receipt-panel">
+             <button class="cta-button back-btn" onclick="showPanel('home-panel')">← Back to Home</button>
+            <div class="receipt-panel-content">
+                <div class="receipt-form-wrapper panel-card">
+                    <h2>विवरण भरें</h2>
+                    <div class="form-group"><label for="client-name">ग्राहक का नाम (Client Name):</label><input type="text" id="client-name" value="Wardiere Inc." onkeyup="generateInvoice()"></div>
+                    <div class="form-group"><label for="invoice-no">इनवॉइस नंबर (Invoice No):</label><input type="text" id="invoice-no" value="12345" onkeyup="generateInvoice()"></div>
+                    <div class="form-group"><label for="date">तारीख (Date):</label><input type="date" id="date" value="2025-04-25" onchange="generateInvoice()"></div>
+                    <hr>
+                    <h3>आइटम (Items)</h3>
+                    <div id="items-container">
+                        <div class="item-row"><input type="text" class="item-name" placeholder="Item Name" value="Digital Paint 1" onkeyup="generateInvoice()"><input type="number" class="item-qty" placeholder="Qty" value="5" onkeyup="generateInvoice()"><input type="number" class="item-price" placeholder="Price" value="100" onkeyup="generateInvoice()"></div>
+                    </div>
+                    <button type="button" class="cta-button add-item-btn" onclick="addItem()">+ और आइटम जोड़ें</button>
+                    <hr style="margin-top: 20px;">
+                    <h3>भुगतान विवरण (Payment Details)</h3>
+                    <div class="form-group"><label for="bank-name">बैंक का नाम (Bank Name):</label><input type="text" id="bank-name" value="Borcelle Bank" onkeyup="generateInvoice()"></div>
+                    <div class="form-group"><label for="bank-code">बैंक कोड (Bank Code):</label><input type="text" id="bank-code" value="123-456-7890" onkeyup="generateInvoice()"></div>
+                    <button type="button" class="cta-button download-pdf-btn" onclick="downloadPDF()">Download PDF</button>
+                </div>
+                <div id="invoice-container">
+                    <header class="invoice-header"><h1>INVOICE</h1><div class="logo"><img src="https://i.ibb.co/bQdD4qg/vivexa-logo.png" alt="Vivexa Tech Logo"></div></header>
+                    <section class="invoice-details"><div class="billed-to"><p style="font-weight: bold; font-size: 20px;" id="client-name-output"></p><p>Invoice No : <span id="invoice-no-output"></span></p><p>Date : <span id="date-output"></span></p></div><div class="company-name">Vivexa <br><span>Tech</span></div></section>
+                    <table class="invoice-table"><thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead><tbody id="invoice-items-output"></tbody></table>
+                    <div class="total-section">Total &nbsp;&nbsp;&nbsp; <span id="grand-total-output"></span></div>
+                    <div class="payment-details"><p style="font-weight: bold;">Payment Details :</p><p>Bank Code : <span id="bank-code-output"></span></p><p>Bank Name : <span id="bank-name-output"></span></p></div>
+                    <div class="thank-you">Thankyou</div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
 <div id="edit-modal-overlay" class="modal-overlay">
     <div class="modal-content">
-        <div class="modal-header">
-            <h2>Edit Project</h2>
-            <button class="close-modal" aria-label="Close">&times;</button>
-        </div>
+        <div class="modal-header"><h2>Edit Project</h2><button class="close-modal" aria-label="Close">&times;</button></div>
         <form id="edit-project-form">
-            <div class="form-group">
-                <label for="edit-title">Project Title</label>
-                <input type="text" id="edit-title" required>
-            </div>
-            <div class="form-group">
-                <label for="edit-description">Project Description</label>
-                <input type="text" id="edit-description" required>
-            </div>
-            <div class="form-group">
-                <label for="edit-tags">Tech Tags (comma separated)</label>
-                <input type="text" id="edit-tags" required>
-            </div>
-            <div class="form-group">
-                <label for="edit-image">Upload New Image (optional)</label>
-                <input type="file" id="edit-image" accept="image/*">
-                <p style="font-size: 0.8rem; margin-top: 5px;">(Sirf tabhi select karein jab image badalni ho)</p>
-            </div>
+            <div class="form-group"><label for="edit-title">Project Title</label><input type="text" id="edit-title" required></div>
+            <div class="form-group"><label for="edit-description">Project Description</label><input type="text" id="edit-description" required></div>
+            <div class="form-group"><label for="edit-tags">Tech Tags (comma separated)</label><input type="text" id="edit-tags" required></div>
+            <div class="form-group"><label for="edit-image">Upload New Image (optional)</label><input type="file" id="edit-image" accept="image/*"><p style="font-size: 0.8rem; margin-top: 5px;">(Sirf tabhi select karein jab image badalni ho)</p></div>
             <button type="submit" class="cta-button">Save Changes</button>
         </form>
     </div>
 </div>
 
-<script src="firebase-config.js"></script> <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js"></script>
+<script src="firebase-config.js"></script> 
+<script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-storage-compat.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const ADMIN_EMAIL = "vivexatech@gmail.com"; 
+    // --- GLOBAL CONSTANTS & VARIABLES ---
+    const ADMIN_EMAIL = "vivexatech@gmail.com";
+    const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/drkvub4nq/image/upload";
+    const CLOUDINARY_UPLOAD_PRESET = "vivexa_img";
 
-    // Firebase initialization (sirf Firestore ke liye)
+    // Firebase initialization
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
     const googleProvider = new firebase.auth.GoogleAuthProvider();
+    const { jsPDF } = window.jspdf;
 
-    const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/drkvub4nq/image/upload";
-    const CLOUDINARY_UPLOAD_PRESET = "vivexa_img";
-
+    // --- DOM ELEMENT REFERENCES ---
     const loginContainer = document.getElementById('login-container');
-    const adminPanel = document.getElementById('admin-panel');
-    const loginBtn = document.getElementById('login-btn');
-    const logoutBtn = document.getElementById('logout-btn');
+    const adminArea = document.getElementById('admin-area');
     const adminEmailEl = document.getElementById('admin-email');
+    const logoutBtn = document.getElementById('logout-btn');
 
+    const homePanel = document.getElementById('home-panel');
+    const portfolioPanel = document.getElementById('portfolio-panel');
+    const receiptPanel = document.getElementById('receipt-panel');
+
+    const goToPortfolioBtn = document.getElementById('go-to-portfolio-btn');
+    const goToReceiptBtn = document.getElementById('go-to-receipt-btn');
+    const loginBtn = document.getElementById('login-btn');
+    
+    // Portfolio elements
+    const addProjectForm = document.getElementById('add-project-form');
+    const projectsContainer = document.getElementById('project-items-container');
     const editModalOverlay = document.getElementById('edit-modal-overlay');
     const editForm = document.getElementById('edit-project-form');
     const closeModalBtn = document.querySelector('.close-modal');
 
+    // --- PANEL NAVIGATION LOGIC ---
+    window.showPanel = (panelId) => {
+        homePanel.style.display = 'none';
+        portfolioPanel.style.display = 'none';
+        receiptPanel.style.display = 'none';
+        document.getElementById(panelId).style.display = 'block';
+    };
+
+    goToPortfolioBtn.addEventListener('click', () => showPanel('portfolio-panel'));
+    goToReceiptBtn.addEventListener('click', () => {
+        showPanel('receipt-panel');
+        generateInvoice(); // Refresh invoice when panel is shown
+    });
+
+    // --- AUTHENTICATION ---
     auth.onAuthStateChanged(user => {
         if (user && user.email === ADMIN_EMAIL) {
             loginContainer.style.display = 'none';
-            adminPanel.style.display = 'block';
+            adminArea.style.display = 'block';
+            showPanel('home-panel');
             adminEmailEl.textContent = 'Logged in as: Owner';
             loadProjects();
         } else {
             loginContainer.style.display = 'block';
-            adminPanel.style.display = 'none';
-            if (user) { 
+            adminArea.style.display = 'none';
+            if (user) {
                 auth.signOut();
                 alert("Access Denied. Only the admin can log in.");
             }
         }
     });
 
-    loginBtn.addEventListener('click', () => { auth.signInWithPopup(googleProvider).catch(err => console.error(err)); });
-    logoutBtn.addEventListener('click', () => { auth.signOut(); });
+    loginBtn.addEventListener('click', () => auth.signInWithPopup(googleProvider).catch(err => console.error(err)));
+    logoutBtn.addEventListener('click', () => auth.signOut());
 
-    // Add Project
-    const addProjectForm = document.getElementById('add-project-form');
+    // --- PORTFOLIO MANAGEMENT ---
     addProjectForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const title = document.getElementById('title').value;
@@ -174,22 +267,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const imageFile = document.getElementById('image').files[0];
 
         if (!title || !description || !tags.length || !imageFile) {
-            alert("Please fill all fields."); return;
+            return alert("Please fill all fields.");
         }
 
         const submitBtn = addProjectForm.querySelector('button');
         submitBtn.disabled = true; submitBtn.textContent = 'Uploading...';
 
         try {
-            // Cloudinary upload
             const formData = new FormData();
             formData.append("file", imageFile);
             formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-
-            const cloudRes = await fetch(CLOUDINARY_URL, {
-                method: "POST",
-                body: formData
-            });
+            const cloudRes = await fetch(CLOUDINARY_URL, { method: "POST", body: formData });
             const cloudData = await cloudRes.json();
             const imageUrl = cloudData.secure_url;
 
@@ -208,12 +296,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Load Projects
-    const projectsContainer = document.getElementById('project-items-container');
     function loadProjects() {
         db.collection('portfolio').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
             projectsContainer.innerHTML = '';
-            if(snapshot.empty) {
+            if (snapshot.empty) {
                 projectsContainer.innerHTML = '<p>No projects found.</p>';
                 return;
             }
@@ -221,22 +307,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 const project = doc.data();
                 const projectEl = document.createElement('div');
                 projectEl.className = 'project-item';
-                projectEl.innerHTML = `
-                    <span>${project.title}</span>
-                    <div class="actions">
-                        <button class="edit-btn" data-id="${doc.id}">Edit</button>
-                        <button class="delete-btn" data-id="${doc.id}">Delete</button>
-                    </div>
-                `;
+                projectEl.innerHTML = `<span>${project.title}</span><div class="actions"><button class="edit-btn" data-id="${doc.id}">Edit</button><button class="delete-btn" data-id="${doc.id}">Delete</button></div>`;
                 projectsContainer.appendChild(projectEl);
             });
         });
     }
 
-    // Edit/Delete Actions
     projectsContainer.addEventListener('click', async (e) => {
         const docId = e.target.dataset.id;
-        
+        if (!docId) return;
+
         if (e.target.classList.contains('delete-btn')) {
             if (confirm("Are you sure you want to delete this project?")) {
                 try {
@@ -247,31 +327,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (e.target.classList.contains('edit-btn')) {
-            const docRef = db.collection('portfolio').doc(docId);
-            const docSnap = await docRef.get();
+            const docSnap = await db.collection('portfolio').doc(docId).get();
             if (docSnap.exists()) {
                 const projectData = docSnap.data();
                 document.getElementById('edit-title').value = projectData.title;
                 document.getElementById('edit-description').value = projectData.description;
                 document.getElementById('edit-tags').value = projectData.tags.join(', ');
-                
                 editForm.dataset.docId = docId;
                 editForm.dataset.oldImageUrl = projectData.imageUrl;
-                
                 editModalOverlay.style.display = 'flex';
             }
         }
     });
 
-    // Save Edited Project
     editForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const docId = editForm.dataset.docId;
         const newImageFile = document.getElementById('edit-image').files[0];
-        
         const submitBtn = editForm.querySelector('button');
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Saving...';
+        submitBtn.disabled = true; submitBtn.textContent = 'Saving...';
 
         try {
             let updatedImageUrl = editForm.dataset.oldImageUrl;
@@ -279,25 +353,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 const formData = new FormData();
                 formData.append("file", newImageFile);
                 formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-
-                const cloudRes = await fetch(CLOUDINARY_URL, {
-                    method: "POST",
-                    body: formData
-                });
+                const cloudRes = await fetch(CLOUDINARY_URL, { method: "POST", body: formData });
                 const cloudData = await cloudRes.json();
                 updatedImageUrl = cloudData.secure_url;
             }
-
             const updatedData = {
                 title: document.getElementById('edit-title').value,
                 description: document.getElementById('edit-description').value,
                 tags: document.getElementById('edit-tags').value.split(',').map(tag => tag.trim()),
                 imageUrl: updatedImageUrl
             };
-            
             await db.collection('portfolio').doc(docId).update(updatedData);
             alert("Project updated successfully!");
-            
         } catch (error) {
             console.error("Error updating project:", error);
             alert("Failed to update project.");
@@ -316,11 +383,81 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     closeModalBtn.addEventListener('click', closeEditModal);
     editModalOverlay.addEventListener('click', (e) => {
-        if (e.target === editModalOverlay) {
-            closeEditModal();
-        }
+        if (e.target === editModalOverlay) closeEditModal();
     });
+
+    // --- RECEIPT GENERATOR LOGIC ---
+    window.addItem = function() {
+        const itemsContainer = document.getElementById('items-container');
+        const itemRow = document.createElement('div');
+        itemRow.className = 'item-row';
+        itemRow.innerHTML = `<input type="text" class="item-name" placeholder="Item Name" onkeyup="generateInvoice()"><input type="number" class="item-qty" placeholder="Qty" onkeyup="generateInvoice()"><input type="number" class="item-price" placeholder="Price" onkeyup="generateInvoice()">`;
+        itemsContainer.appendChild(itemRow);
+    };
+    
+    window.generateInvoice = function() {
+        const clientName = document.getElementById('client-name').value;
+        const invoiceNo = document.getElementById('invoice-no').value;
+        const dateInput = document.getElementById('date').value;
+        const bankName = document.getElementById('bank-name').value;
+        const bankCode = document.getElementById('bank-code').value;
+
+        let formattedDate = '';
+        if (dateInput) {
+            const date = new Date(dateInput);
+            formattedDate = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        document.getElementById('client-name-output').innerText = clientName;
+        document.getElementById('invoice-no-output').innerText = invoiceNo;
+        document.getElementById('date-output').innerText = formattedDate;
+        document.getElementById('bank-name-output').innerText = bankName;
+        document.getElementById('bank-code-output').innerText = bankCode;
+
+        const itemRows = document.getElementById('items-container').getElementsByClassName('item-row');
+        const invoiceItemsOutput = document.getElementById('invoice-items-output');
+        invoiceItemsOutput.innerHTML = '';
+        let grandTotal = 0;
+
+        for (let i = 0; i < itemRows.length; i++) {
+            const name = itemRows[i].getElementsByClassName('item-name')[0].value;
+            const qty = parseFloat(itemRows[i].getElementsByClassName('item-qty')[0].value);
+            const price = parseFloat(itemRows[i].getElementsByClassName('item-price')[0].value);
+
+            if (name && !isNaN(qty) && !isNaN(price)) {
+                const total = qty * price;
+                grandTotal += total;
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${name}</td><td>${qty}</td><td>₹${price.toFixed(2)}</td><td>₹${total.toFixed(2)}</td>`;
+                invoiceItemsOutput.appendChild(row);
+            }
+        }
+        document.getElementById('grand-total-output').innerText = `₹${grandTotal.toFixed(2)}`;
+    };
+
+    window.downloadPDF = function() {
+        const invoiceElement = document.getElementById('invoice-container');
+        const invoiceNo = document.getElementById('invoice-no').value || 'invoice';
+        const downloadBtn = document.querySelector('.download-pdf-btn');
+        downloadBtn.textContent = 'Downloading...';
+        downloadBtn.disabled = true;
+
+        html2canvas(invoiceElement, { scale: 2 }).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const canvasWidth = canvas.width;
+            const canvasHeight = canvas.height;
+            const pdf = new jsPDF({ orientation: canvasWidth > canvasHeight ? 'l' : 'p', unit: 'px', format: [canvasWidth, canvasHeight] });
+            pdf.addImage(imgData, 'PNG', 0, 0, canvasWidth, canvasHeight);
+            pdf.save(`invoice-${invoiceNo}.pdf`);
+            downloadBtn.textContent = 'Download PDF';
+            downloadBtn.disabled = false;
+        });
+    };
+
+    // Initial call to show login screen
+    loginContainer.style.display = 'block';
 });
 </script>
+
 </body>
 </html>
