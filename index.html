@@ -29,7 +29,7 @@
         }
         
         /* --- GENERAL STYLES --- */
-        body { background-color: var(--dark-bg); color: var(--text-secondary); font-family: 'Poppins', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 2rem; box-sizing: border-box;}
+        body { background-color: var(--dark-bg); color: var(--text-secondary); font-family: 'Poppins', sans-serif; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 2rem; box-sizing: border-box;}
         .container { width: 100%; max-width: 1200px; }
         h1, h2, h3 { color: var(--text-primary); text-align: center; margin-bottom: 2rem; }
         .cta-button { display: inline-block; width: 100%; padding: 14px 32px; border: none; border-radius: var(--border-radius); background: linear-gradient(90deg, var(--cyan), var(--blue)); color: #fff; font-weight: 700; font-size: 1rem; cursor: pointer; transition: var(--transition); text-align: center; }
@@ -93,6 +93,39 @@
         .payment-details { margin-top: 50px; color: #333; }
         .payment-details p { margin: 5px 0; font-size: 16px; }
         .thank-you { font-family: 'Dancing Script', cursive; font-size: 48px; margin-top: 50px; color: #000; }
+
+        /* --- RESPONSIVE STYLES --- */
+        @media (max-width: 992px) {
+            /* Stack receipt form and preview vertically */
+            .receipt-panel-content {
+                flex-direction: column;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem; /* Reduce padding on smaller screens */
+            }
+            .panel-card, .modal-content {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            /* Stack item input fields vertically on very small screens */
+            #items-container .item-row {
+                flex-direction: column;
+            }
+            #invoice-container {
+                padding: 20px; /* Reduce padding of invoice preview */
+            }
+            .invoice-header h1 {
+                font-size: 36px;
+            }
+            .company-name {
+                font-size: 28px;
+            }
+        }
         
     </style>
 </head>
@@ -142,11 +175,11 @@
                     <h2>विवरण भरें</h2>
                     <div class="form-group"><label for="client-name">ग्राहक का नाम (Client Name):</label><input type="text" id="client-name" value="Wardiere Inc." onkeyup="generateInvoice()"></div>
                     <div class="form-group"><label for="invoice-no">इनवॉइस नंबर (Invoice No):</label><input type="text" id="invoice-no" value="12345" onkeyup="generateInvoice()"></div>
-                    <div class="form-group"><label for="date">तारीख (Date):</label><input type="date" id="date" value="2025-04-25" onchange="generateInvoice()"></div>
+                    <div class="form-group"><label for="date">तारीख (Date):</label><input type="date" id="date" value="2025-08-12" onchange="generateInvoice()"></div>
                     <hr>
                     <h3>आइटम (Items)</h3>
                     <div id="items-container">
-                        <div class="item-row"><input type="text" class="item-name" placeholder="Item Name" value="Digital Paint 1" onkeyup="generateInvoice()"><br><input type="number" class="item-qty" placeholder="Qty" value="5" onkeyup="generateInvoice()"><br><input type="number" class="item-price" placeholder="Price" value="100" onkeyup="generateInvoice()"><br></div>
+                        <div class="item-row"><input type="text" class="item-name" placeholder="Item Name" value="Digital Paint 1" onkeyup="generateInvoice()"><input type="number" class="item-qty" placeholder="Qty" value="5" onkeyup="generateInvoice()"><input type="number" class="item-price" placeholder="Price" value="100" onkeyup="generateInvoice()"></div>
                     </div>
                     <button type="button" class="cta-button add-item-btn" onclick="addItem()">+ और आइटम जोड़ें</button>
                     <hr style="margin-top: 20px;">
@@ -222,6 +255,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const editModalOverlay = document.getElementById('edit-modal-overlay');
     const editForm = document.getElementById('edit-project-form');
     const closeModalBtn = document.querySelector('.close-modal');
+    
+    // Set default date to today for receipt generator
+    document.getElementById('date').valueAsDate = new Date();
+
 
     // --- PANEL NAVIGATION LOGIC ---
     window.showPanel = (panelId) => {
@@ -243,6 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
             loginContainer.style.display = 'none';
             adminArea.style.display = 'block';
             showPanel('home-panel');
+            adminEmailEl.textContent = 'Logged in as: Owner';
             loadProjects();
         } else {
             loginContainer.style.display = 'block';
@@ -404,7 +442,10 @@ document.addEventListener('DOMContentLoaded', () => {
         let formattedDate = '';
         if (dateInput) {
             const date = new Date(dateInput);
-            formattedDate = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            // Adjust for timezone offset to prevent showing previous day
+            const userTimezoneOffset = date.getTimezoneOffset() * 60000;
+            const correctedDate = new Date(date.getTime() + userTimezoneOffset);
+            formattedDate = correctedDate.toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' });
         }
 
         document.getElementById('client-name-output').innerText = clientName;
@@ -441,13 +482,18 @@ document.addEventListener('DOMContentLoaded', () => {
         downloadBtn.textContent = 'Downloading...';
         downloadBtn.disabled = true;
 
-        html2canvas(invoiceElement, { scale: 2 }).then(canvas => {
+        html2canvas(invoiceElement, { scale: 2, useCORS: true }).then(canvas => {
             const imgData = canvas.toDataURL('image/png');
             const canvasWidth = canvas.width;
             const canvasHeight = canvas.height;
             const pdf = new jsPDF({ orientation: canvasWidth > canvasHeight ? 'l' : 'p', unit: 'px', format: [canvasWidth, canvasHeight] });
             pdf.addImage(imgData, 'PNG', 0, 0, canvasWidth, canvasHeight);
             pdf.save(`invoice-${invoiceNo}.pdf`);
+            downloadBtn.textContent = 'Download PDF';
+            downloadBtn.disabled = false;
+        }).catch(err => {
+            console.error("PDF generation failed:", err);
+            alert("Could not download PDF. Check console for errors.");
             downloadBtn.textContent = 'Download PDF';
             downloadBtn.disabled = false;
         });
