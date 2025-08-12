@@ -146,7 +146,7 @@
                     <hr>
                     <h3>आइटम (Items)</h3>
                     <div id="items-container">
-                        <div class="item-row"><input type="text" class="item-name" placeholder="Item Name" value="Digital Paint 1" onkeyup="generateInvoice()"><input type="number" class="item-qty" placeholder="Qty" value="5" onkeyup="generateInvoice()"><input type="number" class="item-price" placeholder="Price" value="100" onkeyup="generateInvoice()"></div>
+                        <div class="item-row"><input type="text" class="item-name" placeholder="Item Name" value="Digital Paint 1" onkeyup="generateInvoice()"><br><input type="number" class="item-qty" placeholder="Qty" value="5" onkeyup="generateInvoice()"><br><input type="number" class="item-price" placeholder="Price" value="100" onkeyup="generateInvoice()"><br></div>
                     </div>
                     <button type="button" class="cta-button add-item-btn" onclick="addItem()">+ और आइटम जोड़ें</button>
                     <hr style="margin-top: 20px;">
@@ -243,7 +243,6 @@ document.addEventListener('DOMContentLoaded', () => {
             loginContainer.style.display = 'none';
             adminArea.style.display = 'block';
             showPanel('home-panel');
-            adminEmailEl.textContent = 'Logged in as: Owner';
             loadProjects();
         } else {
             loginContainer.style.display = 'block';
