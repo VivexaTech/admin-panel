@@ -1,263 +1,283 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-    <title>Receipt Generator</title>
-    <link rel="icon" type="image/svg+xml" href="https://www.vivexatech.online/assets/favicon/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Receipt Generator</title>
+  <link rel="icon" type="image/svg+xml" href="https://www.vivexatech.online/assets/favicon/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-    <style>
-        :root {
-            --dark-bg: #0A101E; --dark-card: #10182C; --dark-border: #1E293B;
-            --text-primary: #E2E8F0; --text-secondary: #94A3B8; --cyan: #00E6F7; --blue: #3672F8;
-            --green: #22c55e; --red: #ef4444; --gray: #475569;
-            --border-radius: 8px; --transition: all 0.3s ease;
-        }
-        body { background-color: var(--dark-bg); color: var(--text-secondary); font-family: 'Poppins', sans-serif; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 2rem; box-sizing: border-box; visibility: hidden; }
-        .container { width: 100%; max-width: 1400px; /* Increased max-width to accommodate A4 preview */ }
-        h2, h3 { color: var(--text-primary); text-align: center; margin-bottom: 2rem; }
-        .panel-card { background-color: var(--dark-card); padding: 2rem; border-radius: var(--border-radius); border: 1px solid var(--dark-border); }
-        .cta-button { display: inline-block; width: 100%; padding: 14px 32px; border: none; border-radius: var(--border-radius); background: linear-gradient(90deg, var(--cyan), var(--blue)); color: #fff; font-weight: 700; font-size: 1rem; cursor: pointer; transition: var(--transition); text-decoration: none; box-sizing: border-box; text-align: center; }
-        .cta-button:hover { filter: brightness(1.2); }
-        .cta-button:disabled { background: var(--gray); cursor: not-allowed; filter: brightness(0.7); }
-        .back-btn { background: var(--gray); margin-bottom: 2rem; display: block; width: fit-content; padding: 10px 20px; font-size: 0.9rem;}
-        .form-group { margin-bottom: 1.5rem; }
-        .form-group label { display: block; margin-bottom: 5px; font-size: 0.9rem; }
-        .form-group input { width: 100%; padding: 12px; background-color: var(--dark-bg); border: 1px solid var(--dark-border); border-radius: var(--border-radius); color: var(--text-primary); font-size: 1rem; box-sizing: border-box; }
-        .receipt-panel-content { display: flex; gap: 2rem; align-items: flex-start; }
-        .receipt-form-wrapper { flex: 1; min-width: 350px; }
-        #items-container .item-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
-        #items-container .item-row .item-name { flex-grow: 1; }
-        #items-container .item-row .item-qty,
-        #items-container .item-row .item-price { width: 70px; flex-shrink: 0; }
-        .add-item-btn { background: var(--green); }
-        .download-pdf-btn { background: var(--red); }
-        
-        /* --- MODIFIED CSS FOR A4 PREVIEW --- */
-        #reciept-container {
-            width: 794px; /* A4 width in pixels at 96 DPI */
-            min-height: 1123px; /* A4 height in pixels at 96 DPI */
-            background: #fff;
-            color: #000;
-            padding: 40px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-            border: 1px solid #eee;
-            margin: 0 auto; /* Center the reciept preview */
-            box-sizing: border-box;
-        }
-        .reciept-header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 20px; border-bottom: 2px solid #000; }
-        .reciept-header h1 { font-size: 48px; font-weight: 700; margin: 0; color: #000; }
-        .logo img { max-width: 150px; }
-        .company-name { font-size: 36px; font-weight: bold; color: #000; text-align: right; }
-        .company-name span { color: #00AEEF; }
-        .reciept-details { display: flex; justify-content: space-between; margin-top: 20px; color: #333; }
-        .billed-to p { margin: 5px 0; }
-        .reciept-table { width: 100%; border-collapse: collapse; margin-top: 40px; }
-        .reciept-table thead { border-bottom: 2px dotted #000; }
-        .reciept-table th { text-align: left; padding: 10px; color: #555; font-weight: 500; }
-        .reciept-table td { padding: 15px 10px; color: #333; }
-        .reciept-table th:not(:first-child), .reciept-table td:not(:first-child) { text-align: right; }
-        .reciept-table tbody tr { border-bottom: 1px dotted #ccc; }
-        .reciept-table tbody tr:last-child { border-bottom: 2px dotted #000; }
-        .total-section { text-align: right; margin-top: 20px; font-size: 24px; font-weight: bold; color: #000; }
-        .payment-details { margin-top: 50px; color: #333; }
-        .payment-details p { margin: 5px 0; font-size: 16px; }
-        .thank-you { font-family: 'Dancing Script', cursive; font-size: 48px; margin-top: 50px; color: #000; }
+  <style>
+    :root {
+      --dark-bg: #0A101E; --dark-card: #10182C; --dark-border: #1E293B;
+      --text-primary: #E2E8F0; --text-secondary: #94A3B8; --cyan: #00E6F7; --blue: #3672F8;
+      --green: #22c55e; --red: #ef4444; --gray: #475569;
+      --border-radius: 8px; --transition: all 0.3s ease;
+    }
+    body {
+      background-color: var(--dark-bg);
+      color: var(--text-secondary);
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 2rem;
+      box-sizing: border-box;
+      visibility: hidden;
+    }
+    .container { width: 100%; max-width: 1400px; }
+    h2, h3 { color: var(--text-primary); margin-bottom: 1rem; }
+    .panel-card {
+      background-color: var(--dark-card);
+      padding: 2rem;
+      border-radius: var(--border-radius);
+      border: 1px solid var(--dark-border);
+    }
+    .cta-button {
+      display: inline-block;
+      width: 100%;
+      padding: 14px 32px;
+      border: none;
+      border-radius: var(--border-radius);
+      background: linear-gradient(90deg, var(--cyan), var(--blue));
+      color: #fff;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: var(--transition);
+      text-decoration: none;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    .cta-button:hover { filter: brightness(1.2); }
+    .cta-button:disabled { background: var(--gray); cursor: not-allowed; filter: brightness(0.7); }
+    .back-btn { background: var(--gray); margin-bottom: 2rem; width: fit-content; padding: 10px 20px; font-size: 0.9rem;}
+    .form-group { margin-bottom: 1.5rem; }
+    .form-group label { display: block; margin-bottom: 5px; font-size: 0.9rem; }
+    .form-group input { width: 100%; padding: 12px; background-color: var(--dark-bg); border: 1px solid var(--dark-border); border-radius: var(--border-radius); color: var(--text-primary); font-size: 1rem; box-sizing: border-box; }
+    .receipt-panel-content { display: flex; gap: 2rem; align-items: flex-start; }
+    .receipt-form-wrapper { flex: 1; min-width: 350px; }
+    #items-container .item-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+    #items-container .item-row .item-name { flex-grow: 1; }
+    #items-container .item-row .item-qty,
+    #items-container .item-row .item-price { width: 70px; flex-shrink: 0; }
+    .add-item-btn { background: var(--green); }
+    .download-pdf-btn { background: var(--red); }
 
-        @media (max-width: 1200px) { /* Changed breakpoint for better responsiveness */
-            .receipt-panel-content { flex-direction: column; }
-            #reciept-container {
-                width: 100%; /* Make it responsive on smaller screens */
-                min-height: unset;
-                margin-top: 2rem;
-            }
-        }
-        @media (max-width: 480px) {
-            #items-container .item-row { flex-direction: column; align-items: stretch; }
-            #items-container .item-row .item-qty,
-            #items-container .item-row .item-price { width: 100%; }
-        }
-    </style>
+    /* Receipt Styling (A4 size) */
+    #receipt-container {
+      width: 794px; min-height: 1123px; background: #fff; color: #000;
+      padding: 40px; box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+      border: 1px solid #eee; margin: 0 auto; box-sizing: border-box;
+    }
+    .receipt-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 15px; }
+    .receipt-header img { max-width: 120px; }
+    .receipt-header h1 { margin: 10px 0 5px; font-size: 36px; }
+    .receipt-header p { margin: 0; font-size: 14px; color: #555; }
+
+    .receipt-info { margin-top: 20px; display: flex; justify-content: space-between; font-size: 14px; }
+    .receipt-info div p { margin: 4px 0; }
+
+    table.receipt-table {
+      width: 100%; border-collapse: collapse; margin-top: 30px; font-size: 14px;
+    }
+    .receipt-table th, .receipt-table td {
+      padding: 10px; border-bottom: 1px dotted #ccc;
+    }
+    .receipt-table th { background: #f5f5f5; text-align: left; }
+    .receipt-table td:last-child, .receipt-table th:last-child { text-align: right; }
+
+    .totals { margin-top: 20px; text-align: right; font-size: 16px; }
+    .totals p { margin: 5px 0; }
+
+    .thank-you {
+      font-family: 'Dancing Script', cursive;
+      font-size: 40px; margin-top: 50px; text-align: center; color: #000;
+    }
+
+    @media (max-width: 1200px) {
+      .receipt-panel-content { flex-direction: column; }
+      #receipt-container { width: 100%; min-height: unset; margin-top: 2rem; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <a href="index.html" class="cta-button back-btn">← Back to Dashboard</a>
-        <div class="receipt-panel-content">
-            <div class="receipt-form-wrapper panel-card">
-                <h2>Enter Details</h2>
-                <div class="form-group"><label for="client-name">Client Name:</label><input type="text" id="client-name" value="Wardiere Inc." onkeyup="generatereciept()"></div>
-                <div class="form-group"><label for="reciept-no">reciept No:</label><input type="text" id="reciept-no" value="12345" onkeyup="generatereciept()"></div>
-                <div class="form-group"><label for="date">Date:</label><input type="date" id="date" onchange="generatereciept()"></div>
-                <hr>
-                <h3>Items</h3>
-                <div id="items-container">
-                    <div class="item-row">
-                        <input type="text" class="item-name" placeholder="Item Name" value="Digital Painting" onkeyup="generatereciept()">
-                        <input type="number" class="item-qty" placeholder="Qty" value="6" onkeyup="generatereciept()">
-                        <input type="number" class="item-price" placeholder="Price" value="100" onkeyup="generatereciept()">
-                    </div>
-                </div>
-                <button type="button" class="cta-button add-item-btn" onclick="addItem()">+ Add More Items</button>
-                <hr style="margin-top: 20px;">
-                <h3>Payment Details</h3>
-                <div class="form-group"><label for="bank-name">Bank Name:</label><input type="text" id="bank-name" value="Borcelle Bank" onkeyup="generatereciept()"></div>
-                <div class="form-group"><label for="bank-code">Bank Code:</label><input type="text" id="bank-code" value="123-456-7890" onkeyup="generatereciept()"></div>
-                <button type="button" class="cta-button download-pdf-btn" onclick="downloadPDF()">Download PDF</button>
-            </div>
-            <div id="reciept-container">
-                <header class="reciept-header"><h1>reciept</h1><div class="logo"><img src="https://www.vivexatech.online/assets/favicon/web-app-manifest-512x512.png" alt="Vivexa Tech Logo"></div></header>
-                <section class="reciept-details"><div class="billed-to"><p style="font-weight: bold; font-size: 20px;" id="client-name-output"></p><p>reciept No: <span id="reciept-no-output"></span></p><p>Date: <span id="date-output"></span></p></div><div class="company-name">Vivexa <br><span>Tech</span></div></section>
-                <table class="reciept-table"><thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead><tbody id="reciept-items-output"></tbody></table>
-                <div class="total-section">Total &nbsp;&nbsp;&nbsp; <span id="grand-total-output"></span></div>
-                <div class="payment-details"><p style="font-weight: bold;">Payment Details:</p><p>Bank Code: <span id="bank-code-output"></span></p><p>Bank Name: <span id="bank-name-output"></span></p></div>
-                <div class="thank-you">Thankyou</div>
-            </div>
+  <div class="container">
+    <a href="index.html" class="cta-button back-btn">← Back</a>
+    <div class="receipt-panel-content">
+      <!-- Form -->
+      <div class="receipt-form-wrapper panel-card">
+        <h2>Receipt Details</h2>
+        <div class="form-group"><label>Customer Name:</label><input type="text" id="client-name" value="John Doe" onkeyup="generateReceipt()"></div>
+        <div class="form-group"><label>Receipt No:</label><input type="text" id="receipt-no" value="R-1001" onkeyup="generateReceipt()"></div>
+        <div class="form-group"><label>Date:</label><input type="date" id="date" onchange="generateReceipt()"></div>
+        <div class="form-group"><label>Transaction ID:</label><input type="text" id="transaction-id" value="TXN123456" onkeyup="generateReceipt()"></div>
+        <hr>
+        <h3>Purchased Items</h3>
+        <div id="items-container">
+          <div class="item-row">
+            <input type="text" class="item-name" value="Digital Art" onkeyup="generateReceipt()">
+            <input type="number" class="item-qty" value="1" onkeyup="generateReceipt()">
+            <input type="number" class="item-price" value="500" onkeyup="generateReceipt()">
+          </div>
         </div>
+        <button type="button" class="cta-button add-item-btn" onclick="addItem()">+ Add Item</button>
+        <hr>
+        <h3>Payment Method</h3>
+        <div class="form-group"><input type="text" id="payment-method" value="UPI" onkeyup="generateReceipt()"></div>
+        <button type="button" class="cta-button download-pdf-btn" onclick="downloadPDF()">Download PDF</button>
+      </div>
+
+      <!-- Receipt Preview -->
+      <div id="receipt-container">
+        <div class="receipt-header">
+          <img src="https://www.vivexatech.online/assets/favicon/web-app-manifest-512x512.png" alt="Logo">
+          <h1>Receipt</h1>
+          <p>Vivexa Tech | www.vivexatech.online</p>
+        </div>
+        <div class="receipt-info">
+          <div>
+            <p><strong>Customer:</strong> <span id="client-name-output"></span></p>
+            <p><strong>Date:</strong> <span id="date-output"></span></p>
+          </div>
+          <div>
+            <p><strong>Receipt No:</strong> <span id="receipt-no-output"></span></p>
+            <p><strong>Transaction ID:</strong> <span id="transaction-id-output"></span></p>
+          </div>
+        </div>
+        <table class="receipt-table">
+          <thead>
+            <tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr>
+          </thead>
+          <tbody id="receipt-items-output"></tbody>
+        </table>
+        <div class="totals">
+          <p><strong>Total Paid:</strong> ₹<span id="grand-total-output"></span></p>
+        </div>
+        <div class="thank-you">Thank you for your payment!</div>
+      </div>
     </div>
+  </div>
 
-    <script src="firebase-config.js"></script> 
-    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-auth-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-auth-compat.js"></script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const ADMIN_EMAIL = "vivexatech@gmail.com";
-            
-            firebase.initializeApp(firebaseConfig);
-            const auth = firebase.auth();
-            const { jsPDF } = window.jspdf;
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const ADMIN_EMAIL = "vivexatech@gmail.com";
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const { jsPDF } = window.jspdf;
 
-            // Auth guard
-            auth.onAuthStateChanged(user => {
-                if (user && user.email === ADMIN_EMAIL) {
-                    document.body.style.visibility = 'visible';
-                } else {
-                    window.location.href = 'index.html';
-                }
-            });
+      auth.onAuthStateChanged(user => {
+        if (user && user.email === ADMIN_EMAIL) {
+          document.body.style.visibility = 'visible';
+        } else {
+          window.location.href = 'index.html';
+        }
+      });
 
-            document.getElementById('date').valueAsDate = new Date();
+      document.getElementById('date').valueAsDate = new Date();
 
-            // All your receipt generator JS functions go here...
-            window.addItem = function() {
-                const itemsContainer = document.getElementById('items-container');
-                const itemRow = document.createElement('div');
-                itemRow.className = 'item-row';
-                itemRow.innerHTML = `<input type="text" class="item-name" placeholder="Item Name" onkeyup="generatereciept()"><input type="number" class="item-qty" placeholder="Qty" onkeyup="generatereciept()"><input type="number" class="item-price" placeholder="Price" onkeyup="generatereciept()">`;
-                itemsContainer.appendChild(itemRow);
-            };
-            
-            window.generatereciept = function() {
-                const clientName = document.getElementById('client-name').value;
-                const recieptNo = document.getElementById('reciept-no').value;
-                const dateInput = document.getElementById('date').value;
-                const bankName = document.getElementById('bank-name').value;
-                const bankCode = document.getElementById('bank-code').value;
+      window.addItem = function() {
+        const row = document.createElement('div');
+        row.className = 'item-row';
+        row.innerHTML = `
+          <input type="text" class="item-name" onkeyup="generateReceipt()">
+          <input type="number" class="item-qty" onkeyup="generateReceipt()">
+          <input type="number" class="item-price" onkeyup="generateReceipt()">
+        `;
+        document.getElementById('items-container').appendChild(row);
+      };
 
-                let formattedDate = '';
-                if (dateInput) {
-                    const date = new Date(dateInput);
-                    const userTimezoneOffset = date.getTimezoneOffset() * 60000;
-                    const correctedDate = new Date(date.getTime() + userTimezoneOffset);
-                    formattedDate = correctedDate.toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' });
-                }
+      window.generateReceipt = function() {
+        const clientName = document.getElementById('client-name').value;
+        const receiptNo = document.getElementById('receipt-no').value;
+        const date = document.getElementById('date').value;
+        const transactionId = document.getElementById('transaction-id').value;
+        const paymentMethod = document.getElementById('payment-method').value;
 
-                document.getElementById('client-name-output').innerText = clientName;
-                document.getElementById('reciept-no-output').innerText = recieptNo;
-                document.getElementById('date-output').innerText = formattedDate;
-                document.getElementById('bank-name-output').innerText = bankName;
-                document.getElementById('bank-code-output').innerText = bankCode;
+        let formattedDate = '';
+        if (date) {
+          const d = new Date(date);
+          formattedDate = d.toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
 
-                const itemRows = document.getElementById('items-container').getElementsByClassName('item-row');
-                const recieptItemsOutput = document.getElementById('reciept-items-output');
-                recieptItemsOutput.innerHTML = '';
-                let grandTotal = 0;
+        document.getElementById('client-name-output').innerText = clientName;
+        document.getElementById('receipt-no-output').innerText = receiptNo;
+        document.getElementById('date-output').innerText = formattedDate;
+        document.getElementById('transaction-id-output').innerText = transactionId;
 
-                for (let i = 0; i < itemRows.length; i++) {
-                    const name = itemRows[i].getElementsByClassName('item-name')[0].value;
-                    const qty = parseFloat(itemRows[i].getElementsByClassName('item-qty')[0].value);
-                    const price = parseFloat(itemRows[i].getElementsByClassName('item-price')[0].value);
+        const itemsOutput = document.getElementById('receipt-items-output');
+        itemsOutput.innerHTML = '';
+        let grandTotal = 0;
 
-                    if (name && !isNaN(qty) && !isNaN(price)) {
-                        const total = qty * price;
-                        grandTotal += total;
-                        const row = document.createElement('tr');
-                        row.innerHTML = `<td>${name}</td><td>${qty}</td><td>₹${price.toFixed(2)}</td><td>₹${total.toFixed(2)}</td>`;
-                        recieptItemsOutput.appendChild(row);
-                    }
-                }
-                document.getElementById('grand-total-output').innerText = `₹${grandTotal.toFixed(2)}`;
-            };
-
-            // --- MODIFIED JAVASCRIPT FOR A4 PDF GENERATION ---
-            window.downloadPDF = function() {
-                const recieptElement = document.getElementById('reciept-container');
-                const recieptNo = document.getElementById('reciept-no').value || 'reciept';
-                const downloadBtn = document.querySelector('.download-pdf-btn');
-                
-                downloadBtn.textContent = 'Downloading...';
-                downloadBtn.disabled = true;
-
-                html2canvas(recieptElement, { 
-                    scale: 2, // Use a higher scale for better resolution
-                    useCORS: true 
-                }).then(canvas => {
-                    const imgData = canvas.toDataURL('image/png');
-                    
-                    // A4 page size in jsPDF's default units (points)
-                    const pdf = new jsPDF({
-                        orientation: 'portrait',
-                        unit: 'pt',
-                        format: 'a4'
-                    });
-
-                    // Get image properties from the canvas
-                    const imgProps = pdf.getImageProperties(imgData);
-                    const pdfWidth = pdf.internal.pageSize.getWidth();
-                    const pdfHeight = pdf.internal.pageSize.getHeight();
-                    
-                    // Calculate the image's aspect ratio
-                    const imgRatio = imgProps.width / imgProps.height;
-                    const pdfRatio = pdfWidth / pdfHeight;
-
-                    let finalWidth, finalHeight, x, y;
-
-                    // Determine how to scale the image to fit the A4 page
-                    if (imgRatio > pdfRatio) {
-                        // Image is wider than the page, so fit to width
-                        finalWidth = pdfWidth;
-                        finalHeight = finalWidth / imgRatio;
-                        x = 0;
-                        y = (pdfHeight - finalHeight) / 2; // Center vertically
-                    } else {
-                        // Image is taller than or same ratio as the page, so fit to height
-                        finalHeight = pdfHeight;
-                        finalWidth = finalHeight * imgRatio;
-                        x = (pdfWidth - finalWidth) / 2; // Center horizontally
-                        y = 0;
-                    }
-                    
-                    // Add the image to the PDF, scaled and centered
-                    pdf.addImage(imgData, 'PNG', x, y, finalWidth, finalHeight);
-                    pdf.save(`reciept-${recieptNo}.pdf`);
-
-                }).catch(err => {
-                    console.error("PDF generation failed:", err);
-                    alert("Could not download PDF. Check console for errors.");
-                }).finally(() => {
-                    downloadBtn.textContent = 'Download PDF';
-                    downloadBtn.disabled = false;
-                });
-            };
-
-            generatereciept();
+        document.querySelectorAll('#items-container .item-row').forEach(row => {
+          const name = row.querySelector('.item-name').value;
+          const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
+          const price = parseFloat(row.querySelector('.item-price').value) || 0;
+          if (name && qty > 0 && price >= 0) {
+            const total = qty * price;
+            grandTotal += total;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${name}</td><td>${qty}</td><td>₹${price.toFixed(2)}</td><td>₹${total.toFixed(2)}</td>`;
+            itemsOutput.appendChild(tr);
+          }
         });
-    </script>
+
+        document.getElementById('grand-total-output').innerText = grandTotal.toFixed(2);
+      };
+
+      window.downloadPDF = function() {
+        const receipt = document.getElementById('receipt-container');
+        const fileName = document.getElementById('receipt-no').value || 'receipt';
+        const btn = document.querySelector('.download-pdf-btn');
+
+        btn.textContent = 'Downloading...';
+        btn.disabled = true;
+
+        html2canvas(receipt, { scale: 2, useCORS: true }).then(canvas => {
+          const imgData = canvas.toDataURL('image/png');
+          const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
+
+          const pdfWidth = pdf.internal.pageSize.getWidth();
+          const pdfHeight = pdf.internal.pageSize.getHeight();
+          const imgProps = pdf.getImageProperties(imgData);
+          const imgRatio = imgProps.width / imgProps.height;
+          const pdfRatio = pdfWidth / pdfHeight;
+
+          let finalWidth, finalHeight, x, y;
+          if (imgRatio > pdfRatio) {
+            finalWidth = pdfWidth;
+            finalHeight = finalWidth / imgRatio;
+            x = 0;
+            y = (pdfHeight - finalHeight) / 2;
+          } else {
+            finalHeight = pdfHeight;
+            finalWidth = finalHeight * imgRatio;
+            x = (pdfWidth - finalWidth) / 2;
+            y = 0;
+          }
+
+          pdf.addImage(imgData, 'PNG', x, y, finalWidth, finalHeight);
+          pdf.save(`${fileName}.pdf`);
+        }).catch(err => {
+          alert("PDF generation failed.");
+          console.error(err);
+        }).finally(() => {
+          btn.textContent = 'Download PDF';
+          btn.disabled = false;
+        });
+      };
+
+      generateReceipt();
+    });
+  </script>
 </body>
 </html>
