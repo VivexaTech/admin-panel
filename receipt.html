@@ -36,7 +36,7 @@
         #items-container .item-row .item-name { flex-grow: 1; }
         #items-container .item-row .item-qty,
         #items-container .item-row .item-price { width: 70px; flex-shrink: 0; }
-        .add-item-btn { background: var(--green); }
+        .add-item-btn { background: var(--green); margin-bottom: 2rem;}
         .download-pdf-btn { background: var(--red); }
         
         #invoice-container {
@@ -49,6 +49,8 @@
             border: 1px solid #eee;
             margin: 0 auto;
             box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
         }
         .invoice-header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 20px; border-bottom: 2px solid #000; }
         .invoice-header h1 { font-size: 48px; font-weight: 700; margin: 0; color: #000; }
@@ -65,9 +67,7 @@
         .invoice-table tbody tr { border-bottom: 1px dotted #ccc; }
         .invoice-table tbody tr:last-child { border-bottom: 2px dotted #000; }
         .total-section { text-align: right; margin-top: 20px; font-size: 24px; font-weight: bold; color: #000; }
-        .payment-details { margin-top: 50px; color: #333; }
-        .payment-details p { margin: 5px 0; font-size: 16px; }
-        .thank-you { font-family: 'Dancing Script', cursive; font-size: 48px; margin-top: 50px; color: #000; }
+        .thank-you { font-family: 'Dancing Script', cursive; font-size: 48px; color: #000; margin-top: auto; padding-top: 50px; }
 
         @media (max-width: 1200px) {
             .receipt-panel-content { flex-direction: column; }
@@ -92,6 +92,7 @@
                 <h2>Enter Receipt Details</h2>
                 <div class="form-group"><label for="client-name">Received from:</label><input type="text" id="client-name" value="Wardiere Inc." onkeyup="generateReceipt()"></div>
                 <div class="form-group"><label for="receipt-no">Receipt No:</label><input type="text" id="receipt-no" value="R-12345" onkeyup="generateReceipt()"></div>
+                <div class="form-group"><label for="transaction-id">Transaction ID:</label><input type="text" id="transaction-id" value="TXN-9876543210" onkeyup="generateReceipt()"></div>
                 <div class="form-group"><label for="date">Date:</label><input type="date" id="date" onchange="generateReceipt()"></div>
                 <hr>
                 <h3>Items</h3>
@@ -103,18 +104,13 @@
                     </div>
                 </div>
                 <button type="button" class="cta-button add-item-btn" onclick="addItem()">+ Add More Items</button>
-                <hr style="margin-top: 20px;">
-                <h3>Payment Confirmation</h3>
-                <div class="form-group"><label for="bank-name">Paid to Bank:</label><input type="text" id="bank-name" value="Borcelle Bank" onkeyup="generateReceipt()"></div>
-                <div class="form-group"><label for="bank-code">Account Details:</label><input type="text" id="bank-code" value="123-456-7890" onkeyup="generateReceipt()"></div>
                 <button type="button" class="cta-button download-pdf-btn" onclick="downloadPDF()">Download PDF</button>
             </div>
             <div id="invoice-container">
                 <header class="invoice-header"><h1>RECEIPT</h1><div class="logo"><img src="https://www.vivexatech.online/assets/favicon/web-app-manifest-512x512.png" alt="Vivexa Tech Logo"></div></header>
-                <section class="invoice-details"><div class="billed-to"><p style="font-weight:bold; font-size:18px;">Received from:</p><p style="font-weight: bold; font-size: 20px;" id="client-name-output"></p><p>Receipt No: <span id="receipt-no-output"></span></p><p>Date: <span id="date-output"></span></p></div><div class="company-name">Vivexa <br><span>Tech</span></div></section>
+                <section class="invoice-details"><div class="billed-to"><p style="font-weight:bold; font-size:18px;">Received from:</p><p style="font-weight: bold; font-size: 20px;" id="client-name-output"></p><p>Receipt No: <span id="receipt-no-output"></span></p><p>Transaction ID: <span id="transaction-id-output"></span></p><p>Date: <span id="date-output"></span></p></div><div class="company-name">Vivexa <br><span>Tech</span></div></section>
                 <table class="invoice-table"><thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead><tbody id="invoice-items-output"></tbody></table>
                 <div class="total-section">Amount Paid &nbsp;&nbsp;&nbsp; <span id="grand-total-output"></span></div>
-                <div class="payment-details"><p style="font-weight: bold;">Paid To:</p><p>Bank Name: <span id="bank-name-output"></span></p><p>Account: <span id="bank-code-output"></span></p></div>
                 <div class="thank-you">Thank you for your payment!</div>
             </div>
         </div>
@@ -153,10 +149,9 @@
             window.generateReceipt = function() {
                 const clientName = document.getElementById('client-name').value;
                 const receiptNo = document.getElementById('receipt-no').value;
+                const transactionId = document.getElementById('transaction-id').value;
                 const dateInput = document.getElementById('date').value;
-                const bankName = document.getElementById('bank-name').value;
-                const bankCode = document.getElementById('bank-code').value;
-
+                
                 let formattedDate = '';
                 if (dateInput) {
                     const date = new Date(dateInput);
@@ -167,10 +162,9 @@
 
                 document.getElementById('client-name-output').innerText = clientName;
                 document.getElementById('receipt-no-output').innerText = receiptNo;
+                document.getElementById('transaction-id-output').innerText = transactionId;
                 document.getElementById('date-output').innerText = formattedDate;
-                document.getElementById('bank-name-output').innerText = bankName;
-                document.getElementById('bank-code-output').innerText = bankCode;
-
+                
                 const itemRows = document.getElementById('items-container').getElementsByClassName('item-row');
                 const invoiceItemsOutput = document.getElementById('invoice-items-output');
                 invoiceItemsOutput.innerHTML = '';
